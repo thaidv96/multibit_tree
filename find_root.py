@@ -6,7 +6,7 @@ import sys
 from collections import Counter
 import pickle
 path = sys.argv[1]
-chunksize = sys.argv[2]
+chunksize = int(sys.argv[2])
 dfs = pd.read_csv(path, chunksize=chunksize)
 start_time = datetime.now()
 res = Counter()
