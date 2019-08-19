@@ -10,15 +10,31 @@ chunksize = int(sys.argv[2])
 dfs = pd.read_csv(path, chunksize=chunksize)
 start_time = datetime.now()
 res = Counter()
-for i, df in enumerate(dfs):
-    running_time = datetime.now()
-    print("completed:", round(i*chunksize/120e4, 4), '%', 'estimated remaining:',
-          (running_time-start_time)/((i + 1)*chunksize) * 120e6 - (running_time-start_time))
+counted = 0
+start_time = datetime.now()
+
+
+def func(df):
     true_idx = [i.split() for i in df.Fingerprint.values]
     true_idx = [i for o in true_idx for i in o]
     c = Counter(true_idx)
-    res += c
+
+    global counted
+    counted += 1
+    current_time = datetime.now()
+    print('running time:', current_time - start_time, 'completed', counted, 'estimated remaining:', (
+        current_time-start_time)/counted * (120e6/chunksize - counted))
+    return c
+
+
+num_cpus = cpu_count()
+p = Pool(num_cpus-1)
+counters = p.map(func, dfs)
+p.close()
+p.join()
 
 
 with open('root_counter.pickle', 'wb') as handle:
-    pickle.dump(res, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Start writing data")
+    pickle.dump(sum(counters, Counter()), handle,
+                protocol=pickle.HIGHEST_PROTOCOL)
