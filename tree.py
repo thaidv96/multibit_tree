@@ -1,12 +1,26 @@
 import numpy as np
 
 
+def find_split_idx(fingerprints):
+    # Fingerprints are stored in format:
+    # np.array([[1,0,0,1,1,0],[1,0,1,1,0,0]])
+    num_fingerprints = fingerprints.shape[0]
+    num_occurences_by_cols = fingerprints.sum(axis=0)
+    differences = np.abs(num_occurences_by_cols - num_fingerprints/2)
+    if differences.min() == num_fingerprints/2:
+        return None
+
+    idx = np.argmin(differences)
+    return idx
+
+
 class Node(object):
     def __init__(self,  fingerprint_indices,  idx=None):
         self.idx = idx
         self.fingerprint_indices = fingerprint_indices
         self.must_contains = None
         self.not_contains = None
+        self.num_idx = len(self.fingerprint_indices)
 
     def set_idx(self, idx):
         del self.idx
@@ -37,6 +51,17 @@ class Tree(object):
 
     def set_o_child(self, tree):
         self.o_child = tree
+
+    def get_fingerprint_idx(self):
+        res = []
+        candidates = [self.i_child, self.o_child]
+        while len(candidates) != 0:
+            child = candidates.pop(0)
+            if child.root.idx != None:
+                candidates += [child.i_child, child.o_child]
+            else:
+                res.append(child.root.fingerprint_indices)
+        return res
 
 
 class MultibitTree(object):
@@ -92,30 +117,30 @@ class MultibitTree(object):
         root_node = Node(np.array(range(len(self.fingerprints))))
         self.build_tree_recursively(root_node)
 
+    def insert_bulk_fingerprints(self, fingerprints):
+        # Stupid way: rebuild the tree
+        self.fingerprints += fingerprints
+        self.fingerprint_idx = np.arange(0, self.fingerprints.shape[0])
+        self.build_tree()
 
-def find_split_idx(fingerprints):
-    # Fingerprints are stored in format:
-    # np.array([[1,0,0,1,1,0],[1,0,1,1,0,0]])
-    num_fingerprints = fingerprints.shape[0]
-    num_occurences_by_cols = fingerprints.sum(axis=0)
-    differences = np.abs(num_occurences_by_cols - num_fingerprints/2)
-    if differences.min() == num_fingerprints/2:
-        return None
-
-    idx = np.argmin(differences)
-    return idx
+    # def insert_fingerprint(self, fingerprint):
+    #     self.fingerprints += fingerprints
+    #     self.fingerprint_idx = np.arange(0, self.fingerprints.shape[0])
+    #     root_node = self.tree.root
+    #     while root_node_idx != None:
+    #         if fingerprint[root_node_idx] == 1:
 
 
-# Test case
-fingerprints = np.array([[1, 0, 1, 1, 0, 0],
-                         [0, 1, 1, 0, 0, 1],
-                         [1, 0, 0, 1, 1, 0],
-                         [1, 0, 1, 0, 1, 0],
-                         [0, 1, 0, 1, 0, 1],
-                         [1, 1, 1, 0, 0, 0]
-                         ])
+# # Test case
+# fingerprints = np.array([[1, 0, 1, 1, 0, 0],
+#                          [0, 1, 1, 0, 0, 1],
+#                          [1, 0, 0, 1, 1, 0],
+#                          [1, 0, 1, 0, 1, 0],
+#                          [0, 1, 0, 1, 0, 1],
+#                          [1, 1, 1, 0, 0, 0]
+#                          ])
 
-tree = MultibitTree(fingerprints)
-tree.build_tree()
+# tree = MultibitTree(fingerprints)
+# tree.build_tree()
 
-mlb = tree.tree
+# mlb = tree.tree
