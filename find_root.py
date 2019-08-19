@@ -27,12 +27,10 @@ def func(df):
     return c
 
 
-num_cpus = cpu_count()
-p = Pool(num_cpus-1)
-counters = p.map(func, dfs)
-p.close()
-p.join()
-
+counters = []
+for df in dfs:
+    c = func(df)
+    counters.append(c)
 
 with open('root_counter.pickle', 'wb') as handle:
     print("Start writing data")
