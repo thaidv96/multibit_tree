@@ -110,7 +110,10 @@ class MultibitTree(object):
         if root_node.idx == None or len(root_node.fingerprint_indices) == 1:
             tree.set_root(root_node)
             fn = get_bucket_fn(root_node.fingerprint_indices)
-            os.makedirs(os.path(f'./{self.tree_name}'), exist_ok=True)
+            try:
+                os.mkdir(f'./{self.tree_name}')
+            except:
+                pass
             with open(f"./{self.tree_name}/{fn}.csv", 'a+') as f:
                 f.write(
                     '\n'.join(np.array(root_node.fingerprint_indices).astype(str)))
