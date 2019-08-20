@@ -1,13 +1,38 @@
 import numpy as np
+import random
+from hashlib import sha1
+import os
 
 
-def find_split_idx(fingerprints):
+def get_bucket_fn(list_idx):
+    m = sha1()
+    for idx in list_idx:
+        m.update(f"{idx}".encode('utf8'))
+    return m.hexdigest()
+
+
+def min_inner_similarity(fingerprints):
+    result = 1
+    for i in range(50):
+        pair = random.sample(range(fingerprints.shape[0]), 2)
+        fingerprint1 = fingerprints[pair[0]]
+        fingerprint2 = fingerprints[pair[1]]
+        sim = (fingerprint1 & fingerprint2).sum() / \
+            (fingerprint1 | fingerprint2).sum()
+        if sim < result:
+            result = sim
+    return result
+
+
+def find_split_idx(fingerprints, threshold):
     # Fingerprints are stored in format:
     # np.array([[1,0,0,1,1,0],[1,0,1,1,0,0]])
+
     num_fingerprints = fingerprints.shape[0]
     num_occurences_by_cols = fingerprints.sum(axis=0)
+    min_similarity = min_inner_similarity(fingerprints)
     differences = np.abs(num_occurences_by_cols - num_fingerprints/2)
-    if differences.min() == num_fingerprints/2:
+    if differences.min() == num_fingerprints/2 or min_similarity > threshold:
         return None
 
     idx = np.argmin(differences)
@@ -65,15 +90,16 @@ class Tree(object):
 
 
 class MultibitTree(object):
-    def __init__(self, fingerprints):
+    def __init__(self, fingerprints, tree_name):
         self.fingerprints = fingerprints
         self.fingerprint_idx = np.arange(0, fingerprints.shape[1])
         self.tree = None
+        self.tree_name = tree_name
 
     def build_tree_recursively(self, root_node):
         fingerprint_indices = root_node.fingerprint_indices
 
-        split_idx = find_split_idx(self.fingerprints[fingerprint_indices])
+        split_idx = find_split_idx(self.fingerprints[fingerprint_indices], 0.5)
 
         idx = split_idx
         root_node.set_idx(idx)
@@ -83,6 +109,12 @@ class MultibitTree(object):
         tree = Tree()
         if root_node.idx == None or len(root_node.fingerprint_indices) == 1:
             tree.set_root(root_node)
+            fn = get_bucket_fn(root_node.fingerprint_indices)
+            os.makedirs(os.path(f'./{self.tree_name}'), exist_ok=True)
+            with open(f"./{self.tree_name}/{fn}.csv", 'a+') as f:
+                f.write(
+                    '\n'.join(np.array(root_node.fingerprint_indices).astype(str)))
+
             return tree
 
         # Find must contains and not contains set:
@@ -118,7 +150,7 @@ class MultibitTree(object):
         self.build_tree_recursively(root_node)
 
     def insert_bulk_fingerprints(self, fingerprints):
-        # Stupid way: rebuild the tree
+        # : rebuild the tree
         self.fingerprints += fingerprints
         self.fingerprint_idx = np.arange(0, self.fingerprints.shape[0])
         self.build_tree()

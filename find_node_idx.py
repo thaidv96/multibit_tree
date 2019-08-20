@@ -15,6 +15,7 @@ start_time = datetime.now()
 res = Counter()
 counted = 0
 start_time = datetime.now()
+num_records = 0
 
 
 def check_in_condition(conds, values):
@@ -52,7 +53,6 @@ def func(df, condition):
 
 
 counters = []
-num_records = 0
 for df in dfs:
     c = func(df, condition)
     counters.append(c)
