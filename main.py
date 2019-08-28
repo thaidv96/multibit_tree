@@ -6,7 +6,7 @@ from tree import MultibitTree
 import pickle
 import numpy as np
 
-num_processes = cpu_count()-2
+num_processes = cpu_count() - 2
 
 
 def convert_fingerprint(fingerprints):
@@ -22,15 +22,18 @@ def main():
     chunksize = int(sys.argv[2])
     fingerprints = None
     dfs = pd.read_csv(path, chunksize=chunksize)
+    print("Num processes", num_processes)
     for df in dfs:
         sample_fingerprints = df.Fingerprint.str.split().values
-        p = Pool(cpu_count())
+        p = Pool(num_processes)
         print(len(sample_fingerprints))
         try:
-            blocks = np.split(sample_fingerprints, cpu_count())
+            blocks = np.split(sample_fingerprints, num_processes)
 
             sample_fingerprints = np.concatenate(
                 p.map(convert_fingerprint, blocks))
+            print("Num processes", num_processes)
+
         except Exception as e:
             print(e)
             sample_fingerprints = convert_fingerprint(sample_fingerprints)
@@ -45,6 +48,7 @@ def main():
     fingerprints = np.array(fingerprints)
     with open(f'fingerprints.pickle', 'wb') as handle:
         pickle.dump(fingerprints, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Start Build Tree")
     tree = MultibitTree(fingerprints, 'sample_tree')
     tree.build_tree()
 
