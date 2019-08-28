@@ -39,15 +39,20 @@ def main():
             sample_fingerprints = convert_fingerprint(sample_fingerprints)
         p.close()
         p.join()
+
+        try:
+            with open("fingerprints.pickle", 'rb') as handle:
+                fingerprints = pickle.load(handle)
+        except:
+            fingerprints = None
         if type(fingerprints) == type(None):
             fingerprints = sample_fingerprints
         else:
             fingerprints = np.concatenate(
                 [fingerprints, sample_fingerprints])
-
-    fingerprints = np.array(fingerprints)
-    with open(f'fingerprints.pickle', 'wb') as handle:
-        pickle.dump(fingerprints, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(f'fingerprints.pickle', 'wb') as handle:
+            pickle.dump(fingerprints, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        fingerprints = None
     print("Start Build Tree")
     tree = MultibitTree(fingerprints, 'sample_tree')
     tree.build_tree()
