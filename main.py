@@ -25,21 +25,21 @@ def main():
     print("Num processes", num_processes)
     for df in dfs:
         sample_fingerprints = df.Fingerprint.str.split().values
-        p = Pool(num_processes)
+        # p = Pool(num_processes)
         print(len(sample_fingerprints))
-        try:
-            blocks = np.split(sample_fingerprints, num_processes)
+        # try:
+        #     blocks = np.split(sample_fingerprints, num_processes)
 
-            sample_fingerprints = np.concatenate(
-                p.map(convert_fingerprint, blocks))
-            print("Num processes", num_processes)
+        #     sample_fingerprints = np.concatenate(
+        #         p.map(convert_fingerprint, blocks))
+        #     print("Num processes", num_processes)
 
-        except Exception as e:
-            print(e)
-            sample_fingerprints = convert_fingerprint(sample_fingerprints)
-        p.close()
-        p.join()
-
+        # except Exception as e:
+        #     print(e)
+        sample_fingerprints = convert_fingerprint(sample_fingerprints)
+        # p.close()
+        # p.join()
+        print("Sample fingerprints size", sample_fingerprints.shape[0])
         try:
             with open("fingerprints.pickle", 'rb') as handle:
                 fingerprints = pickle.load(handle)
