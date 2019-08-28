@@ -31,7 +31,8 @@ def main():
 
             sample_fingerprints = np.concatenate(
                 p.map(convert_fingerprint, blocks))
-        except:
+        except Exception as e:
+            print(e)
             sample_fingerprints = convert_fingerprint(sample_fingerprints)
         p.close()
         p.join()
