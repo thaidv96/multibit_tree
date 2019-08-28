@@ -1,0 +1,19 @@
+--2019-08-22 13:57:22--  https://www.overleaf.com/download/project/5ce60b3a8490ac19f5ce2685/build/16cb1e91b67-cb0a5157b7453669/output/output.pdf?compileGroup=standard
+Resolving www.overleaf.com (www.overleaf.com)... 66.228.33.150, 69.164.215.152, 45.79.151.246, ...
+Connecting to www.overleaf.com (www.overleaf.com)|66.228.33.150|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: /restricted?from=%2Fdownload%2Fproject%2F5ce60b3a8490ac19f5ce2685%2Fbuild%2F16cb1e91b67-cb0a5157b7453669%2Foutput%2Foutput.pdf%3FcompileGroup%3Dstandard [following]
+--2019-08-22 13:57:24--  https://www.overleaf.com/restricted?from=%2Fdownload%2Fproject%2F5ce60b3a8490ac19f5ce2685%2Fbuild%2F16cb1e91b67-cb0a5157b7453669%2Foutput%2Foutput.pdf%3FcompileGroup%3Dstandard
+Reusing existing connection to www.overleaf.com:443.
+HTTP request sent, awaiting response... 302 Found
+Location: /login [following]
+--2019-08-22 13:57:24--  https://www.overleaf.com/login
+Reusing existing connection to www.overleaf.com:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 20971 (20K) [text/html]
+Saving to: ‘output.pdf?compileGroup=standard’
+
+          output.pd   0%[                    ]       0  --.-KB/s               output.pdf?compileG 100%[===================>]  20,48K  --.-KB/s    in 0s      
+
+2019-08-22 13:57:24 (214 MB/s) - ‘output.pdf?compileGroup=standard’ saved [20971/20971]
+

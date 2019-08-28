@@ -4,28 +4,43 @@ import sys
 from multiprocessing import Pool, cpu_count
 from tree import MultibitTree
 import pickle
+import numpy as np
 
 num_processes = cpu_count()-2
 
 
-def convert_fingerprint(fingerprint):
-    res = np.zeros(300)
-    res[np.array(fingerprint).astype(int)] = 1
+def convert_fingerprint(fingerprints):
+
+    res = np.zeros((len(fingerprints), 300))
+    for idx, fingerprint in enumerate(fingerprints):
+        res[idx, np.array(fingerprint).astype(int)] = 1
     return res.astype(bool)
 
 
 def main():
     path = sys.argv[1]
-    fingerprints = []
     chunksize = int(sys.argv[2])
+    fingerprints = None
     dfs = pd.read_csv(path, chunksize=chunksize)
     for df in dfs:
         sample_fingerprints = df.Fingerprint.str.split().values
+        p = Pool(cpu_count())
+        print(len(sample_fingerprints))
+        try:
+            blocks = np.split(sample_fingerprints, cpu_count())
 
-        sample_fingerprints = [convert_fingerprint(
-            i) for i in sample_fingerprints]
+            sample_fingerprints = np.concatenate(
+                p.map(convert_fingerprint, blocks))
+        except:
+            sample_fingerprints = convert_fingerprint(sample_fingerprints)
+        p.close()
+        p.join()
+        if type(fingerprints) == type(None):
+            fingerprints = sample_fingerprints
+        else:
+            fingerprints = np.concatenate(
+                [fingerprints, sample_fingerprints])
 
-        fingerprints += sample_fingerprints
     fingerprints = np.array(fingerprints)
     with open(f'fingerprints.pickle', 'wb') as handle:
         pickle.dump(fingerprints, handle, protocol=pickle.HIGHEST_PROTOCOL)
