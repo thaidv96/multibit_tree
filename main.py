@@ -5,7 +5,7 @@ from multiprocessing import Pool, cpu_count
 from tree import MultibitTree
 import pickle
 import numpy as np
-
+import glob
 num_processes = cpu_count() - 2
 
 
@@ -23,10 +23,9 @@ def main():
     fingerprints = None
     dfs = pd.read_csv(path, chunksize=chunksize)
     print("Num processes", num_processes)
-    for df in dfs:
+    for i, df in enumerate(dfs):
         sample_fingerprints = df.Fingerprint.str.split().values
         # p = Pool(num_processes)
-        print(len(sample_fingerprints))
         # try:
         #     blocks = np.split(sample_fingerprints, num_processes)
 
@@ -39,23 +38,18 @@ def main():
         sample_fingerprints = convert_fingerprint(sample_fingerprints)
         # p.close()
         # p.join()
-        print("Sample fingerprints size", sample_fingerprints.shape[0])
-        try:
-            with open("fingerprints.pickle", 'rb') as handle:
-                fingerprints = pickle.load(handle)
-        except:
-            fingerprints = None
-        if type(fingerprints) == type(None):
+        if i+1 % 5 == 0:
+            with open(f'./fingerprints/fingerprints{i/5}.pickle', 'wb') as handle:
+                pickle.dump(fingerprints, handle,
+                            protocol=pickle.HIGHEST_PROTOCOL)
             fingerprints = sample_fingerprints
         else:
-            fingerprints = np.concatenate(
-                [fingerprints, sample_fingerprints])
-        with open(f'fingerprints.pickle', 'wb') as handle:
-            pickle.dump(fingerprints, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        fingerprints = None
-    print("Start Build Tree")
-    tree = MultibitTree(fingerprints, 'sample_tree')
-    tree.build_tree()
+            fingerprints = np.concatenate(fingerprints, sample_fingerprints)
+
+    print("DONE")
+    # fingerprint_paths = glob.glob('./fingerprints/*')
+    # tree = MultibitTree(fingerprints, 'sample_tree')
+    # tree.build_tree()
 
 
 if __name__ == '__main__':
