@@ -1,12 +1,10 @@
 import pandas as pd
 import numpy as np
 import sys
-from multiprocessing import Pool, cpu_count
 from tree import MultibitTree
 import pickle
 import numpy as np
 import glob
-num_processes = cpu_count() - 2
 
 
 def convert_fingerprint(fingerprints):
@@ -22,7 +20,6 @@ def main():
     chunksize = int(sys.argv[2])
     fingerprints = None
     dfs = pd.read_csv(path, chunksize=chunksize)
-    print("Num processes", num_processes)
     fingerprints = []
     for i, df in enumerate(dfs):
         sample_fingerprints = df.Fingerprint.str.split().values
@@ -55,5 +52,18 @@ def main():
     # tree.build_tree()
 
 
+def build_tree():
+    finger_files = glob.glob("./fingerprints/*")
+    fingerprints = []
+    for fn in finger_files:
+        with open(fn, 'rb') as handle:
+            sample_fingerprints = pickle.load(handle)
+        fingerprints.append(sample_fingerprints)
+    fingerprints = np.concatenate(fingerprints)
+    tree = MultibitTree(fingerprints, 'sample_tree')
+    tree.build_tree()
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    build_tree()
