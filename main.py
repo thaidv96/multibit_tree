@@ -44,7 +44,7 @@ def main():
                             protocol=pickle.HIGHEST_PROTOCOL)
             fingerprints = sample_fingerprints
         else:
-            fingerprints = np.concatenate(fingerprints, sample_fingerprints)
+            fingerprints = np.concatenate([fingerprints, sample_fingerprints])
 
     print("DONE")
     # fingerprint_paths = glob.glob('./fingerprints/*')
