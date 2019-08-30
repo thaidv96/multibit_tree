@@ -23,6 +23,7 @@ def main():
     fingerprints = None
     dfs = pd.read_csv(path, chunksize=chunksize)
     print("Num processes", num_processes)
+    fingerprints = []
     for i, df in enumerate(dfs):
         sample_fingerprints = df.Fingerprint.str.split().values
         # p = Pool(num_processes)
@@ -38,11 +39,12 @@ def main():
         sample_fingerprints = convert_fingerprint(sample_fingerprints)
         # p.close()
         # p.join()
-        if i+1 % 5 == 0:
+        if i % 5 == 0:
             print(i)
             with open(f'./fingerprints/fingerprints{i/5}.pickle', 'wb') as handle:
                 pickle.dump(fingerprints, handle,
                             protocol=pickle.HIGHEST_PROTOCOL)
+
             fingerprints = sample_fingerprints
         else:
             fingerprints = np.concatenate([fingerprints, sample_fingerprints])
