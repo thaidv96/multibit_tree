@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import numpy as np
 import sys
@@ -55,13 +56,16 @@ def main():
 def build_tree():
     finger_files = glob.glob("./fingerprints/*")
     fingerprints = []
+    print("Start loading fingerprints", datetime.now())
     for fn in finger_files:
         with open(fn, 'rb') as handle:
             sample_fingerprints = pickle.load(handle)
         fingerprints.append(sample_fingerprints)
     fingerprints = np.concatenate(fingerprints)
+    print("Fingerprint loaded", datetime.now())
     tree = MultibitTree(fingerprints, 'sample_tree')
     tree.build_tree()
+    print("Tree built completely", datetime.now())
 
 
 if __name__ == '__main__':
