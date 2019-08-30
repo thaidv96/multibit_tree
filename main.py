@@ -39,6 +39,7 @@ def main():
         # p.close()
         # p.join()
         if i+1 % 5 == 0:
+            print(i)
             with open(f'./fingerprints/fingerprints{i/5}.pickle', 'wb') as handle:
                 pickle.dump(fingerprints, handle,
                             protocol=pickle.HIGHEST_PROTOCOL)
